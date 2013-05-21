@@ -1,1 +1,1 @@
-tar: signal name=@name@-@version@
+tar: dsock name=@name@-@version@
