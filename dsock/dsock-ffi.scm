@@ -67,7 +67,7 @@ c-lambda-end
   (c-lambda (int) int
 #<<c-lambda-end
 struct sockaddr_un clientname;
-size_t size;
+size_t size = sizeof(struct sockaddr_un);
 
 ___result = accept (___arg1, (struct sockaddr *) &clientname, &size);
 c-lambda-end
