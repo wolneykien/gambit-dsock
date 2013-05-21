@@ -109,7 +109,7 @@ c-lambda-end
   ))
 
 (define dlasterror
-  (c-lambda () char-string
+  (c-lambda () int
     "___result = errno;"))
 
 (define dlasterror-string
