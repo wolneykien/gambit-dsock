@@ -21,29 +21,13 @@
 #include <stddef.h>
 #include <string.h>
 #include <errno.h>
+#include <poll.h>
 #include <fcntl.h>
 ")
 
 (define dsocket
   (c-lambda () int
     "___result = socket (PF_LOCAL, SOCK_STREAM, 0);"))
-
-(define dsetnonblock
-  (c-lambda (int int) int
-#<<c-lambda-end
-int oldflags = fcntl (___arg1, F_GETFL, 0);
-/* If reading the flags failed, return error indication now. */
-if (oldflags == -1)
-  return -1;
-/* Set just the flag we want to set. */
-if (___arg2 != 0)
-  oldflags |= O_NONBLOCK;
-else
-  oldflags &= ~O_NONBLOCK;
-/* Store modified flag word in the descriptor. */
-___result = fcntl (___arg1, F_SETFL, oldflags);
-c-lambda-end
-  ))
 
 (define dbind
   (c-lambda (int char-string) int
@@ -64,17 +48,26 @@ c-lambda-end
     "___result = listen (___arg1, ___arg2);"))
 
 (define daccept
-  (c-lambda (int) int
+  (c-lambda (int int) int
 #<<c-lambda-end
 struct sockaddr_un clientname;
 size_t size = sizeof(struct sockaddr_un);
+struct pollfd fds;
 
-___result = accept (___arg1, (struct sockaddr *) &clientname, &size);
+fds.fd = ___arg1;
+fds.events = POLLIN;
+fds.revents = 0;
+___result = poll (&fds, 1, ___arg2);
+if (___result > 0 && (fds.revents & POLLIN)) {
+    ___result = accept (___arg1, (struct sockaddr *) &clientname, &size);
+}
 c-lambda-end
   ))
 
+(define dsock-EINPROGRESS-code (c-lambda () int "___result = EINPROGRESS;"))
+
 (define dconnect
-  (c-lambda (int char-string) int
+  (c-lambda (int char-string int) int
 #<<c-lambda-end
 struct sockaddr_un name;
 size_t size;
@@ -83,7 +76,37 @@ name.sun_family = AF_LOCAL;
 strncpy (name.sun_path, ___arg2, sizeof (name.sun_path));
 name.sun_path[sizeof (name.sun_path) - 1] = '\0';
 size = (offsetof (struct sockaddr_un, sun_path) + strlen (name.sun_path) + 1);
-___result = connect (___arg1, (struct sockaddr *) &name, size);
+int flags = 0;
+struct pollfd fds;
+fds.fd = ___arg1;
+fds.events = POLLOUT;
+fds.revents = 0;
+int valopt;
+socklen_t optlen;
+int ret;
+
+if ((flags = fcntl (___arg1, F_GETFL, NULL)) >= 0) {
+    if ((___result = fcntl (___arg1, F_SETFL, flags | O_NONBLOCK)) == 0) {
+        ___result = connect (___arg1, (struct sockaddr *) &name, size);
+	if (___result < 0) {
+	    if (errno == EINPROGRESS || errno == EALREADY) {
+		if (poll (&fds, 1, ___arg3) > 0 && (fds.revents & POLLOUT)) {
+		    if ((___result = getsockopt (___arg1, SOL_SOCKET, SO_ERROR, &valopt, &optlen)) == 0) {
+		        ___result = errno = valopt;
+		    }
+		} else {
+		    ___result = EINPROGRESS;
+		}
+	    }
+	}
+	ret = fcntl (___arg1, F_SETFL, flags & ~O_NONBLOCK);
+	if (___result == 0) {
+	    ___result = ret;
+	}
+    }
+} else {
+    ___result = (int) flags;
+}
 c-lambda-end
   ))
 
