@@ -1,4 +1,4 @@
-Name: gambit-signal
+Name: gambit-dsock
 Version: 1.0
 Release: alt1
 Summary: UNIX domain sockets for Gambit-C Scheme programming system
