@@ -21,19 +21,19 @@
 
 (define (make-domain-socket path backlog)
   (let ((socket-fd (dsocket)))
-    (if (> 0 socket-fd)
-	(if (= 0 (dbind socket-fd path))
-	    (if (= 0 (dlisten socket-fd backlog))
-		(cons socket-fd path)
-		(raise-domain-socket-lasterror))
-	    (raise-domain-socket-lasterror))
-	(raise-domain-socket-lasterror))))
+    (if (< 0 socket-fd)
+      (if (= 0 (dbind socket-fd path))
+	(if (= 0 (dlisten socket-fd backlog))
+	  (cons socket-fd path)
+	  (raise-domain-socket-lasterror))
+	(raise-domain-socket-lasterror))
+      (raise-domain-socket-lasterror))))
 
 (define (domain-socket? ds)
   (and ds
        (pair? ds)
        (integer? (car ds))
-       (> 0 (car ds))
+       (< 0 (car ds))
        (string? (cdr ds))))
 
 (define (assert-domain-socket ds)
@@ -47,15 +47,15 @@
   (and (assert-domain-socket ds) (cdr ds)))
 
 (define (domain-socket-shutdown-read ds)
-  (or (!= 0 (dshutdown-read (domain-socket-fd ds)))
+  (or (= 0 (dshutdown-read (domain-socket-fd ds)))
       (raise-domain-socket-lasterror)))
 
 (define (domain-socket-shutdown-write ds)
-  (or (!= 0 (dshutdown-write (domain-socket-fd ds)))
+  (or (= 0 (dshutdown-write (domain-socket-fd ds)))
       (raise-domain-socket-lasterror)))
 
 (define (domain-socket-shutdown-both ds)
-  (or (!= 0 (dshutdown (domain-socket-fd ds)))
+  (or (= 0 (dshutdown (domain-socket-fd ds)))
       (raise-domain-socket-lasterror)))
 
 (define (delete-domain-socket ds)
@@ -63,16 +63,26 @@
       (delete-file (domain-socket-path ds))
       #t))
 
-(define (domain-socket-accept ds)
-  (let ((client-fd (daccept (domain-socket-fd ds))))
-    (if (> 0 client-fd)
-	(##open-predefined 3 (list (domain-socket-path ds 'server)) client-fd)
+(define (domain-socket-accept ds . args)
+  (let* ((timeout (or (and (not (null? args)) (pair? args) (car args)) -1))
+	(client-fd (daccept (domain-socket-fd ds) timeout)))
+    (if (< 0 client-fd)
+	(##open-predefined 3 (list (domain-socket-path ds) 'server) client-fd)
+	(if (and (= 0 client-fd) (<= 0 timeout))
+	  #f
+	  (raise-domain-socket-lasterror)))))
+
+(define *EINPROGRESS* (dsock-EINPROGRESS-code))
+
+(define (domain-socket-connect path . args)
+  (let ((timeout (or (and (not (null? args)) (pair? args) (car args)) -1))
+	(socket-fd (dsocket)))
+    (if (< 0 socket-fd)
+	(let ((ret (dconnect socket-fd path timeout)))
+	  (if (= 0 ret)
+	    (##open-predefined 3 (list path 'client) socket-fd)
+	    (if (= *EINPROGRESS* ret)
+	      #f
+	      (raise-domain-socket-lasterror))))
 	(raise-domain-socket-lasterror))))
 
-(define (domain-socket-connect path)
-  (let ((socket-fd (dsocket)))
-    (if (> 0 socket-fd)
-	(if (= 0 (dconnect socket-fd path))
-	    (##open-predefined 3 (list path 'client) socket-fd)
-	    (raise-domain-socket-lasterror))
-	(raise-domain-socket-lasterror))))
