@@ -92,4 +92,8 @@ c-lambda-end
 
 (define dlasterror
   (c-lambda () char-string
+    "___result = errno;"))
+
+(define dlasterror-string
+  (c-lambda () char-string
     "___result = strerror(errno);"))
