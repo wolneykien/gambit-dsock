@@ -58,7 +58,7 @@
   (or (!= 0 (dshutdown (domain-socket-fd ds)))
       (raise-domain-socket-lasterror)))
 
-(define (remove-domain-socket ds)
+(define (delete-domain-socket ds)
   (if (domain-socket-shutdown-both ds)
       (delete-file (domain-socket-path ds))
       #t))
