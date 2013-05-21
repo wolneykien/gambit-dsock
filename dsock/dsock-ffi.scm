@@ -88,7 +88,25 @@ c-lambda-end
   ))
 
 (define dshutdown
-  (c-lambda (int int) int "shutdown"))
+  (c-lambda (int) int
+#<<c-lambda-end
+___result = shutdown (___arg1, SHUT_RDWR);
+c-lambda-end
+  ))
+
+(define dshutdown-read
+  (c-lambda (int) int
+#<<c-lambda-end
+___result = shutdown (___arg1, SHUT_RD);
+c-lambda-end
+  ))
+
+(define dshutdown-write
+  (c-lambda (int) int
+#<<c-lambda-end
+___result = shutdown (___arg1, SHUT_WR);
+c-lambda-end
+  ))
 
 (define dlasterror
   (c-lambda () char-string
