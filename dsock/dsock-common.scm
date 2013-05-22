@@ -19,6 +19,15 @@
   (raise (cons 'domain-socket-exception
 	       (cons (dlasterror) (dlasterror-string)))))
 
+(define (domain-socket-exception? e)
+  (and (pair? e) (eq? 'domain-socket-exception (car e))))
+
+(define (domain-socket-exception-code e)
+  (cadr e))
+
+(define (domain-socket-exception-message e)
+  (caddr e))
+
 (define (make-domain-socket path backlog)
   (let ((socket-fd (dsocket)))
     (if (< 0 socket-fd)
