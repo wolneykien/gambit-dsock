@@ -44,7 +44,8 @@ This package contains the library link file
 %{_includedir}/gambit/libgambc-dsock.c
 
 %changelog
-* Wed May 22 2013 Paul Wolneykien <manowar@altlinux.org> 1.0-alt2
+* Tue May 28 2013 Paul Wolneykien <manowar@altlinux.org> 1.0-alt2
+- Test the polling timeout of 0 trying to accept a connection.
 - Add procs helping to analyse a domain socket exception.
 
 * Tue May 21 2013 Paul Wolneykien <manowar@altlinux.org> 1.0-alt1
