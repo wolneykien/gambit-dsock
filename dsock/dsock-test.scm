@@ -52,7 +52,7 @@
 (define (accept-or-report name ds maxloops)
   (display-message name "Waiting for connection..." #t)
   (let loop ((t 0))
-    (let ((port (domain-socket-accept ds 100)))
+    (let ((port (domain-socket-accept ds 0)))
       (if (and port (port? port))
 	port
 	(if (>= t maxloops)
@@ -60,7 +60,7 @@
 	    (display-message name "Connection timed-out" #t)
 	    #f)
 	  (begin
-	    (thread-sleep! 0.01)
+	    (thread-yield!)
 	    (loop (+ t 1))))))))
 
 (let ((ds (make-domain-socket *socket-path* 2))
