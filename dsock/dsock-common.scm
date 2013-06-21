@@ -74,7 +74,7 @@
 
 (define (domain-socket-accept ds . args)
   (let* ((timeout (or (and (not (null? args)) (pair? args) (car args)) -1))
-	(client-fd (daccept (domain-socket-fd ds) timeout)))
+	 (client-fd (daccept (domain-socket-fd ds) timeout)))
     (if (< 0 client-fd)
 	(##open-predefined 3 (list (domain-socket-path ds) 'server) client-fd)
 	(if (and (= 0 client-fd) (<= 0 timeout))
