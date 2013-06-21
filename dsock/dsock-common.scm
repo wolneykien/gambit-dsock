@@ -26,7 +26,7 @@
   (cadr e))
 
 (define (domain-socket-exception-message e)
-  (caddr e))
+  (cddr e))
 
 (define (make-domain-socket path backlog)
   (let ((socket-fd (dsocket)))
