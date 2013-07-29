@@ -1,0 +1,5 @@
+UNIX domain sockets for Gambit-C Scheme programming system. The code is written to be used as a shared library with *Squidmill* — a Squid proxy server log collector ([wolneykien/squidmill](http://github.com/wolneykien/squidmill)).
+
+The bundled Makefile is adjusted to produce a shared library and run unit tests. The RPM spec is compatible with ALT Linux (Sisyphus).
+
+The code is released under GNU GPL v3+ license.
