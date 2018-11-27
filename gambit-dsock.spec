@@ -7,7 +7,7 @@ Group: Development/Scheme
 
 Packager: Paul Wolneykien <manowar@altlinux.ru>
 
-BuildPreReq: gambit glibc-devel
+BuildRequires: gambit-devel glibc-devel
 
 Source: %name-%version.tar
 
@@ -38,10 +38,10 @@ This package contains the library link file
 %make check
 
 %files
-%{_libdir}/gambit/libgambc-dsock.so
+%{_libdir}/gambit/*.so
 
 %files devel
-%{_includedir}/gambit/libgambc-dsock.c
+%{_includedir}/gambit/*.c
 
 %changelog
 * Mon Apr 03 2017 Paul Wolneykien <manowar@altlinux.org> 1.1-alt6
