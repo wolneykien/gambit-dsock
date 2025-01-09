@@ -29,7 +29,7 @@ This package contains the library link file
 %setup -q
 
 %build
-%make_build
+%make_build CFLAGS='%optflags'
 
 %install
 %makeinstall
