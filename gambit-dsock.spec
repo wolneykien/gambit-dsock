@@ -29,6 +29,7 @@ This package contains the library link file
 %setup -q
 
 %build
+%add_optflags -Wno-discarded-qualifiers -Wno-incompatible-pointer-types
 %make_build CFLAGS='%optflags'
 
 %install
