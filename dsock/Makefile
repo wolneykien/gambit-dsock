@@ -15,7 +15,7 @@ $(BASENAME).c: libgambit-$(BASENAME).c
 	[ -f $< ]
 
 libgambit-$(BASENAME).o: $(BASENAME).c libgambit-$(BASENAME).c
-	gsc -:daq- -obj -cc-options "-D___LIBRARY -D___SHARED -D___PRIMAL" $(BASENAME).c libgambit-$(BASENAME).c
+	gsc -:daq- -obj -cc-options "$(CFLAGS) -D___LIBRARY -D___SHARED -D___PRIMAL" $(BASENAME).c libgambit-$(BASENAME).c
 
 $(BASENAME).o: libgambit-$(BASENAME).o
 	[ -f $< ]
